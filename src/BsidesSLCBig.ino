@@ -22,6 +22,7 @@
 #include "DJRoom.h"
 #include "PanelRoom.h"
 #include "SplashRoom.h"
+#include "EndRoom.h"
 
 
 #define TFT_DC    PA2
@@ -41,22 +42,29 @@
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM(TFT_CS, TFT_DC, TFT_RST);
 XPT2046_Touchscreen ts(T_CS, T_IRQ);
 
-uint16_t TS_MINX    = 300;
-uint16_t TS_MINY    = 200;
+uint16_t TS_MINX    = 200;
+uint16_t TS_MINY    = 150;
 uint16_t TS_MAXX    = 3800;
-uint16_t TS_MAXY    = 3600;
+uint16_t TS_MAXY    = 3700;
 
-Room* roomTable[R_NOCHANGE];
 Room *cur;
 
 void calibrate();
 bool ask();
 
+const char* peermsg[] = {
+  "1-AGILE",
+  "2-DRIVE",
+  "3-MIGHT",
+  "4-HEART",
+  "5-VIGOR"
+};
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(19200);
   
   pinMode(PA10, INPUT_PULLUP);
-  Serial1.begin(9600);
+  //Serial1.begin(9600);
   
   FR.begin(SF_CS);
   
@@ -67,49 +75,52 @@ void setup() {
   ts.begin();
   ts.setRotation(3);
 
-  randomSeed(analogRead(PA0));
+
+
+  pinMode(LIGHT, INPUT_ANALOG);
+  randomSeed(analogRead(LIGHT)); 
+  
   EEPROM.init();
   
   peer_id = EEPROM.read(10);
   if ((peer_id <=0) || (peer_id > 5)) {
-    peer_id = rand() % 5 +1;
-    Serial.print("Invalid peer_id, Resetting to ");Serial.println(peer_id);
+    peer_id = (rand() % 5) +1;
+    //Serial.print("Invalid peer_id, Resetting to ");Serial.println(peer_id);
     EEPROM.write(10, peer_id);
-    calibrate();
+    EEPROM.write(50, TS_MINX);
+    EEPROM.write(52, TS_MINY);
+    EEPROM.write(54, TS_MAXX);
+    EEPROM.write(56, TS_MAXY);
+  }
+  else {
+    TS_MINX = EEPROM.read(50);
+    TS_MINY = EEPROM.read(52);
+    TS_MAXX = EEPROM.read(54);
+    TS_MAXY = EEPROM.read(56);
   }
   for (int i=0; i< 5; i++) {
     if (EEPROM.read(40+i) == 0xcc)
       peers[i] = true;
   }
 
-  TS_MINX = EEPROM.read(50);
-  TS_MINY = EEPROM.read(52);
-  TS_MAXX = EEPROM.read(54);
-  TS_MAXY = EEPROM.read(56);
+
+
+
+  for (int i=0; i<12; ++i)
+    pinMode(ledMap[i], OUTPUT);
+
+  for (int i=11; i>=0; --i) {
+    digitalWrite(ledMap[i], HIGH);
+    delay(50);
+    digitalWrite(ledMap[i], LOW);
+  }
 
   wheel_init();
   wavInit();
 
-  pinMode(LIGHT, INPUT_ANALOG);
   pinMode(NOTPIN, INPUT);
 
-  roomTable[R_ALLEY] = new AlleyRoom();
-  roomTable[R_TV] = new TVRoom();
-  roomTable[R_MARKET] = new MarketRoom();
-  roomTable[R_DIAL] = new DialRoom();
-  roomTable[R_MAINFRAME] = new MainFrameRoom();
-  roomTable[R_STREET] = new StreetRoom();
-  roomTable[R_NIGHTCLUB] = new NightClub();
-  roomTable[R_ARCADE] = new ArcadeRoom();
-  roomTable[R_GAME] = new GameRoom();
-  roomTable[R_DJ] = new DJRoom(); 
-  roomTable[R_PUZZLE] = new PuzzleRoom();
-  roomTable[R_KEYPAD] = new KeypadRoom();
-  roomTable[R_TOWER] = new TowerRoom();
-  roomTable[R_PANEL] = new PanelRoom();
-  roomTable[R_SPLASH] = new SplashRoom();
-
-  cur =  roomTable[R_SPLASH];
+  cur =  new SplashRoom(); 
   cur->refresh(&tft, 0);
 
 }
@@ -152,13 +163,64 @@ void loop() {
         for (int i=0; i<6; ++i)
           EEPROM.update(40+i, 0);
       }
-      if (ask("Do you want to reprogram the flash?"))
+      /*if (ask("Do you want to reprogram the flash?"))
         if (ask("Are you sure, this will wipe all data?!"))
-          WriteFlash(&tft);
+          WriteFlash(&tft);*/
       nvic_sys_reset();
     }
     else if (id != R_NOCHANGE) {
-      cur = roomTable[id];
+      delete cur;
+      switch(id) {
+        case R_ALLEY:
+          cur = new AlleyRoom();
+          break;
+        case R_TV:
+          cur = new TVRoom();
+          break;
+        case R_MARKET:
+          cur = new MarketRoom();
+          break;
+        case R_DIAL:
+          cur = new DialRoom();
+          break;
+        case R_MAINFRAME:
+          cur = new MainFrameRoom();
+          break;
+        case R_STREET:
+          cur= new StreetRoom();
+          break;
+        case R_NIGHTCLUB:
+          cur= new NightClub();
+          break;
+        case R_ARCADE:
+          cur = new ArcadeRoom();
+          break;
+        case R_GAME:
+          cur = new GameRoom();
+          break;
+        case R_DJ:
+          cur = new DJRoom(); 
+          break;
+        case R_PUZZLE:
+          cur= new PuzzleRoom();
+          break;
+        case R_KEYPAD:
+          cur = new KeypadRoom();
+          break;
+        case R_TOWER:
+          cur = new TowerRoom();
+          break;
+        case R_PANEL:
+          cur = new PanelRoom();
+          break;
+        case R_SPLASH:
+          cur = new SplashRoom();
+          break;
+        case R_END:
+          cur = new EndRoom();
+          break;
+      }
+      SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));
       tft.fillScreen(ILI9341_BLACK);
       cur->refresh(&tft, now);
     }
@@ -188,23 +250,23 @@ void loop() {
     cur->touchUp(p.x, p.y);
   }
 
-  if (lastSerial + 1000 < now) {
-    Serial1.write(0xcc);
-    Serial1.write(peer_id);
-    Serial1.write(0xcc ^ peer_id);
+  if (lastSerial + 2000 < now) {
+    Serial.println(peermsg[peer_id-1]);
     lastSerial = now;
   }
-  while (Serial1.available() >= 3) {
-    uint8_t b = Serial1.read();
-    if (b == 0xcc) {
-      int c = Serial1.read();
-      int d = Serial1.read();
-      if ( c == (d ^ 0xcc)) {
-        if ((c>0) && c<6) {
-          Serial.print("Found neew Peer! ");Serial.println(c, HEX);
-          if (!peers[--c]) {
-            peers[c] = true;
-            EEPROM.update(40+c, 0xcc);
+  while (Serial.available() >= 7) {
+    char rin[8] = {0};
+    rin[0] = Serial.read();
+    if ((rin[0] >'0') && (rin[0] < '6')) {
+      for (int i=1; i<7; ++i) {
+        rin[i] = Serial.read();
+      }
+      for (int i=0; i<5; ++i) {
+        if (memcmp(rin, peermsg[i], 7)==0) {
+          wavPlay("pair.wav");
+          if (!peers[i]) {
+            peers[i] = true;
+            EEPROM.update(40+i, 0xcc);
           }
         }
       }
@@ -215,7 +277,7 @@ void loop() {
     analogWrite(TFT_LED, max(0, 255-(backlight/5)));
     backlight-=dt;
   }
-  else { //Tine to sleep
+  else { //Time to sleep
     SerialFlash.sleep();
     SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));
     tft.enterSleepMode();
@@ -282,6 +344,11 @@ void calibrate() {
   EEPROM.update(54, TS_MAXX);
   EEPROM.update(56, TS_MAXY);
 
+  /*Serial.println(TS_MINX);
+  Serial.println(TS_MINY);
+  Serial.println(TS_MAXX);
+  Serial.println(TS_MAXY);*/
+
   SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));
   tft.setTextSize(1);
 }
@@ -318,4 +385,5 @@ bool ask(const char* msg) {
   }
   SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));
 }
+
 

@@ -8,15 +8,14 @@ extern SdFat SD;
 File wavFile = NULL;
 #endif
 
-#define WAVBLOCK	2048
+#define WAVBLOCK	512
 #define	WAVDMA 		1
 
-uint8_t wavDMABuf[2*WAVBLOCK];
+uint8_t wavDMABuf[2*WAVBLOCK]={0};
 
 HardwareTimer wavTimer(4);
 int wavChannel;
 
-bool complete = false;
 bool wavPlaying=false;
 
 uint32_t wavOffset=0;
@@ -29,11 +28,11 @@ void wavCheckBuff() {
 	{
 		if (bufEmpty[i]) {
 			j++;
-			if (!wavFile) {}
-			else if (!wavFile.available()) {
-				complete = true;
+			if ((!wavFile) || (!wavFile.available())) {
+				wavPlaying = false;
 				wavFile.close();
-				memset(&wavDMABuf[WAVBLOCK*i], 0, WAVBLOCK);
+				//memset(&wavDMABuf[WAVBLOCK*i], 0, WAVBLOCK);
+				memset(wavDMABuf, 0, WAVBLOCK*2);
 			}
 			else {
 				int r = wavFile.read(&wavDMABuf[WAVBLOCK*i], WAVBLOCK);
@@ -46,21 +45,18 @@ void wavCheckBuff() {
 		}
 		
 	}
-	if (j==2) {
+	/*if (j==2) {
 		Serial.println("catch up!");
-	}
+	}*/
 }
 
 #ifdef WAVDMA
 
 void WAV_ISR(void) {
-	if (complete) {
-		//wavTimer.pause();
-		//dma_disable(DMA1,DMA_CH7);
-		wavPlaying=false;
-	}
-
 	dma_irq_cause event = dma_get_irq_cause(DMA1, DMA_CH7);
+
+	if (!wavPlaying) return;
+
 	switch(event) {
 	    //the event indicates that the transfer was successfully completed
 	    case DMA_TRANSFER_COMPLETE:
@@ -124,7 +120,7 @@ void wavInit() {
 #if WAVDMA
 	DMA_Setup();
 #endif
-	int prescaler = 18;
+	int prescaler = 6;
 	int overflow = 250;
 	pinMode(BUZZ,PWM);
 	wavChannel = PIN_MAP[BUZZ].timer_channel;
@@ -144,7 +140,7 @@ void wavInit() {
 
 	wavTimer.refresh();
 
-	complete=false;
+	wavPlaying = false;
 	for (int i=0; i<2*WAVBLOCK; ++i)
 		wavDMABuf[i] = 0;
 	bufEmpty[0]=bufEmpty[1]=false;

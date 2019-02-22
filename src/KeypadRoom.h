@@ -4,7 +4,7 @@
 #include "Room.h"
 #include "FlashReader.h"
 
-const int k_key[] = { 6, 3, 1, 7, 0, 2}; //742813
+const char k_key[] = { 6, 3, 1, 7, 0, 2}; 
 
 class KeypadRoom: public Room {
 public:
@@ -19,7 +19,7 @@ public:
   void reset() {idx=0; solved=false;};
   private:
     int _keydown, _lastKey;
-    int number[6], idx;
+    char number[6], idx;
     bool solved;
     roomID n;
 };
@@ -37,6 +37,7 @@ void KeypadRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
   tft->fillCircle(180, 300, 12, ILI9341_MAROON);
   tft->fillCircle(220, 300, 12, ILI9341_DARKGREEN); 
   n = R_NOCHANGE;
+  idx=0;
 }
 
 roomID KeypadRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
@@ -72,14 +73,6 @@ roomID KeypadRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
 }
 
 void KeypadRoom::touchDown(int x, int y) {
-  touchMove(x, y);
-  if (_keydown == 9) {
-    reset();
-    n = R_TOWER;
-  }
-}
-
-void KeypadRoom::touchMove(int x, int y) {
   if ((x>24) && (x<216) && (y>32) && (y<288)) {
     x-=24;
     y-=32;
@@ -87,6 +80,14 @@ void KeypadRoom::touchMove(int x, int y) {
   }
   else
     _keydown = -1;
+  if (_keydown == 9) {
+    reset();
+    n = R_TOWER;
+  }
+}
+
+void KeypadRoom::touchMove(int x, int y) {
+  
 }
 
 void KeypadRoom::touchUp(int x, int y) {

@@ -3,6 +3,7 @@
 
 #include "Room.h"
 
+
 class GameRoom: public Room {
   public:
   GameRoom(): _lastUpdate(0), n(R_NOCHANGE) {reset();};
@@ -21,13 +22,15 @@ class GameRoom: public Room {
     static bool hit(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2);
 
     uint16_t _upInt;
-    uint32_t _startTime, _lastUpdate, _lastShot;
+    uint32_t _startTime, _lastUpdate, _lastShot, _bshot;
     int _lives, _playerX, _targetX;
     int _bx, _by;
     int _pIdx, _bIdx;
     bool _baddies[10][5], _shooting, _right;
     int _playerShots[6][2];
     int _baddieShot[2];
+    bool _drawLives;
+    bool dropped;
     roomID n;
 };
 

@@ -4,12 +4,11 @@
 #include "Room.h"
 #include "FlashReader.h"
 
-//const int key[] = { 4, 3, 5, 6, 8, 7, 9, 2, 7, 4}; //546-798-0385
-const int key[] = { 3, 5, 5, 3, 5, 4, 6, 4, 2, 8}; //4664657539 == googolplex
+const char key[] = { 3, 5, 5, 3, 5, 4, 6, 4, 2, 8}; 
 
 class DialRoom: public Room {
 public:
-  DialRoom(): _keydown(-1), _lastKey(-1), solved(false), n(R_NOCHANGE) {reset();};
+  DialRoom(): _keydown(-1), _lastKey(-1), solved(false), n(R_NOCHANGE), idx(0) {reset();};
   ~DialRoom() {};
   void refresh(Adafruit_ILI9341_STM *tft, unsigned long now);
   roomID update(Adafruit_ILI9341_STM *tft, unsigned long now);
@@ -20,7 +19,7 @@ public:
   void reset() {idx=0; _lastKey=-1; solved=false;};
   private:
     int _keydown, _lastKey;
-    int number[10], idx;
+    char number[10], idx;
     bool solved;
     roomID n;
 };
@@ -28,7 +27,7 @@ public:
 
 void DialRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
   char filename[14];
-  tft->fillRect(0,0,240,320, tft->color565(94, 94, 94));
+  tft->fillScreen(tft->color565(94, 94, 94));
   for (int i=0; i<12; ++i) {
     sprintf(filename, "phon%dup.raw", i+1);
     FR.blt(filename, tft, 8+80*(i%3), 8+80*(i/3), 64, 64);
@@ -52,7 +51,7 @@ roomID DialRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
           }
           else
           {
-            wavPlay("wrongnum.wav");
+            wavPlay("wrongno2.wav");
           }
         }
       }
@@ -80,7 +79,6 @@ void DialRoom::touchDown(int x, int y) {
 }
 
 void DialRoom::touchMove(int x, int y) {
-  _keydown = (x/80) + 3*(y/80);
 }
 
 void DialRoom::touchUp(int x, int y) {

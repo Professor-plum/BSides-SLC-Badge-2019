@@ -4,16 +4,14 @@
 #include "Room.h"
 #include "FlashReader.h"
 
-//const char* hash = "$1$63eae190$owyZl4VPBZGPLqyJwdD6/0";
-
 const char* garbage[] = {
-"Crash Dump:",
+"Memory Dump:",
 "A;.UiUaI.....;ayUT/\\ h.C.A;....p",
 "Ao&1@eGp\"-;0C7iF....O`C.../etc/s",
 "hadow.; p<Gx'E?`yyp...;A~;hA;0u;",
 "p........a<iEU,A;@ U\"rAm,`d DuLA",
-"Ao....&18eGpC;+C;b.....$1$63eae1",
-"90$owyZl4VPBZGPLqyJwdD6/0....p..",
+"Ao....&18eGpC;+C;b.....$1$a0a849",
+"54$aJFyrVMPfprhhHKALlMNQ0....p..",
 "......iEU A;.U)...'i1p^; a<Gx'..",
 "..E?0..;agS;Gx'E?u;`.......Z;Gx'",
 "}..EUuWcB?eOLaCL^......!&A6~!DpL"
@@ -52,8 +50,8 @@ void AlleyRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
 
 roomID AlleyRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
   if (astate == SHOW) {
+    tft->setFont();
     tft->fillRect(20,115,200,120, tft->color565(246,246,174));
-    //FR.blt("trash.raw", tft, 5,215,235,320);
     tft->setTextColor(ILI9341_BLACK);
     for (int i=0; i<10; ++i) {
        tft->setCursor(25, 120 + i*10);

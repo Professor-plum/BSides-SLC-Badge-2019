@@ -5,6 +5,7 @@
 #include "FlashReader.h"
 #include <Fonts/nes.h>
 
+#define shades 32
 
 void WriteFlash(Adafruit_ILI9341_STM *tft);
 
@@ -27,7 +28,8 @@ const char* intro[] = {
 "spreading the message to",
 "embrace individuality and band",
 "together to topple the",
-"repressive system."
+"repressive system.",
+"",
 };
 
 class SplashRoom: public Room {
@@ -40,8 +42,8 @@ public:
   void touchDown(int x, int y);
   void touchUp(int x, int y); 
 private:
-  uint32_t dt, last;
-  int t;
+  uint32_t last;
+  uint32_t t, ii;
   bool config;
 };
 
@@ -54,7 +56,7 @@ void SplashRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
   tft->print("2019");
   tft->setFont();
   t=0;
-  dt=0;
+  ii=0;
   config=false;
 }
 
@@ -72,21 +74,30 @@ roomID SplashRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
     }
   }
   else {
-      if (dt==0)
+      if (ii==0)
         tft->fillScreen(ILI9341_WHITE);
-      dt += now - last;
-      tft->setFont(&Pixel_NES5pt7b);
-    
-      for (int i=0; i<19; ++i) {
-        uint8_t c = 255;
-        uint32_t h = i*1000;
-        if (h < dt)
-          c = 255-min((dt-h)/4, 255);
-        tft->setCursor(10, 10 + i * 12);
+      
+      int c = 255 - (ii % shades)*(256/shades); 
+      int i= ii/shades;
+      if (i<20) {
+        int iy = 10 + i*12;
+        tft->setFont(&Pixel_NES5pt7b);
+        tft->setCursor(10, iy);
         tft->setTextColor(tft->color565(c,c,c));
         tft->print(intro[i]);
+        tft->setFont();
+        ++ii;
       }
-      tft->setFont();
+      else if (ii==20*shades) {
+        tft->setFont(&Pixel_NES5pt7b);
+        for (int j=0; j<20; ++j) {
+          tft->setCursor(10, 10 + j*12);
+          tft->setTextColor(ILI9341_BLACK);
+          tft->print(intro[j]);
+        }
+        tft->setFont();
+        ++ii;
+      }
   }
   last = now;
   if (config) return R_CONFIGURE;
@@ -95,17 +106,17 @@ roomID SplashRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
 }
 
 void SplashRoom::touchDown(int x, int y) {
-  if (t==1 && (dt < 20000))
-    dt += 20000;
+  if (t==1 && (ii < 20*shades))
+    ii = 20*shades;
   else {
     t++;
     if (t==1)
-      dt = 0;
+      ii = 0;
   }
 }
 
 void SplashRoom::touchUp(int x, int y) {
-  if (t==1 && (dt > 5000) && (dt < 20000)) config = true;
+  if (t==1 && (ii > 5*shades) && (ii < 20*shades)) config = true;
 }
 
 #endif

@@ -8,7 +8,7 @@ const int TVy = 160;
 
 class TVRoom: public Room {
   public:
-  TVRoom() {ears[0]=3;ears[1]=3;};
+  TVRoom() : sho(false) {ears[0]=3;ears[1]=3;};
   ~TVRoom() {};
   void refresh(Adafruit_ILI9341_STM *tft, unsigned long now);
   roomID update(Adafruit_ILI9341_STM *tft, unsigned long now);
@@ -19,7 +19,7 @@ class TVRoom: public Room {
   void touchMove(int x, int y);
   private:
     int ears[2];
-    bool out;
+    bool out, redraw, sho;
 };
 
 #endif

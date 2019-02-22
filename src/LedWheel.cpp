@@ -22,7 +22,7 @@ void wheel_setPeriod() {
 	for (int i=0; i<12; ++i)
 		tally += ledStatus[i]?0:15;
 
-	ledTimer.setPeriod(tally * 1000);
+	ledTimer.setPeriod(tally * 500);
 	ledTimer.refresh();
 }
 
@@ -52,4 +52,12 @@ void wheel_set(int id, bool on) {
 
 bool wheel_get(int id) {
 	return ledStatus[id%12];
+}
+
+bool wheel_complete() {
+	for (int i=0; i<12; ++i) {
+		if (!ledStatus[i])
+			return false;
+	}
+	return true;
 }

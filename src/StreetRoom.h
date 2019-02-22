@@ -4,18 +4,19 @@
 #include "Room.h"
 #include "FlashReader.h"
 #include <LedWheel.h>
+#include <Fonts/nes.h>
 
 #define PERSONW 37
 #define PERSONH 76
-#define PERSONOX 32
-#define PERSONOY 192
+#define PERSONOX 35
+#define PERSONOY 195
 
 bool peers[5];
 uint8_t peer_id;
 
 class StreetRoom: public Room {
   public:
-  StreetRoom() {};
+  StreetRoom() : say(false) , sho(false){};
   ~StreetRoom() {};
   void refresh(Adafruit_ILI9341_STM *tft, unsigned long now);
   roomID update(Adafruit_ILI9341_STM *tft, unsigned long now);
@@ -23,6 +24,7 @@ class StreetRoom: public Room {
   void touchDown(int x, int y);
   private:
    roomID n;
+   bool say, sho;
 };
 
 void StreetRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
@@ -70,36 +72,51 @@ roomID StreetRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
     int mod = now % 5000;
     if (mod<2000) FR.blt("persone1.raw", tft, 4*PERSONW + PERSONOX, PERSONOY, PERSONW, PERSONH);
     else {
-      mod = mod % 100;
-      if (mod<50) FR.blt("persone2.raw", tft, 4*PERSONW + PERSONOX, PERSONOY, PERSONW, PERSONH);
+      mod = mod % 200;
+      if (mod<100) FR.blt("persone2.raw", tft, 4*PERSONW + PERSONOX, PERSONOY, PERSONW, PERSONH);
       else FR.blt("persone1.raw", tft, 4*PERSONW + PERSONOX, PERSONOY, PERSONW, PERSONH);
     }
   }
 
-  const char* unite = "UNITE";
-  tft->setCursor(232, 3);
-  tft->setFont();
+  if (say) {
+    say = false;
+    tft->fillRoundRect(93, 52, 98, 15, 3, ILI9341_WHITE);
+    tft->drawRoundRect(93, 52, 98, 15, 3, ILI9341_BLACK);
+    tft->fillTriangle(127, 65, 148, 66, 139, 92, ILI9341_WHITE);
+    tft->drawLine(127, 66, 138, 92, ILI9341_BLACK);
+    tft->drawLine(149, 66, 140, 92, ILI9341_BLACK);
+    tft->setFont(&Pixel_NES5pt7b);
+    tft->setTextColor(ILI9341_BLACK);
+    tft->setCursor(98, 62);
+    tft->print("Unauthorized");
+  }
+
+  if (sho) {
+    FR.blt("sthint.raw", tft, 4, 105, 18,38);
+    sho = false;
+  }
+
+  const char* unite = "U\0N\0I\0T\0E\0";
+  tft->setFont(&Pixel_NES5pt7b);
   tft->setTextColor(ILI9341_WHITE);
-  tft->print(unite[peer_id-1]);
+  tft->setCursor(230, 12);
+  tft->print(&unite[2*(peer_id-1)]);
   return n;
 }
 
 void StreetRoom::touchDown(int x, int y) {
-  if ((x<24) && (y>100) && (y<150)) {
-    wavPlay("morse.wav");
-  }
   if ((x<16) && (y>230)) {
     n = R_NIGHTCLUB;
   }
-  /*if ((x>224) && (y>230)) {
-    return R_NIGHTCLUB;
-  }*/
+  if ((x>4) && (x<22) && (y>110) && (y<130))
+    sho = true;
   if ((x>70) && (x<200) && (y<140)) {
     if (wheel_get(C_SOCIAL)) 
       n = R_TOWER;
     else
     {
-      wavPlay("halt.wav");
+      say = true;
+      wavPlay("halt2.wav");
     }
   }
 }

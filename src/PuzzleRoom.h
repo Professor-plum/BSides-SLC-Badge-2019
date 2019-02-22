@@ -5,6 +5,7 @@
 #include "FlashReader.h"
 
 const char pkey[] = "forgotten";
+int8_t tiles[4][4] = {{0,1,2,3}, {4,5,6,7}, {8,9,10,11}, {12,13,14,-1}};
 
 class PuzzleRoom: public Room {
 public:
@@ -18,35 +19,19 @@ public:
   void touchUp(int x, int y);
   private:
     bool validmove(int x1, int y1, int x2, int y2);
-    int tiles[4][4];
     int sel[2];
-    bool out;
+    bool out, redraw;
 };
 
 PuzzleRoom::PuzzleRoom() {
   sel[0] = sel[1] = -1;
-  tiles[0][0] = 0;
-  tiles[0][1] = 1;
-  tiles[0][2] = 2;
-  tiles[0][3] = 3;
-  tiles[1][0] = 4;
-  tiles[1][1] = 5;
-  tiles[1][2] = 6;
-  tiles[1][3] = 7;
-  tiles[2][0] = 8;
-  tiles[2][1] = 9;
-  tiles[2][2] = 10;
-  tiles[2][3] = 11;
-  tiles[3][0] = 12;
-  tiles[3][1] = 13;
-  tiles[3][2] = 14;
-  tiles[3][3] = -1;
 }
 
 void PuzzleRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
   out = false;
   FR.blt("puzzlet.raw", tft, 0, 0, 240, 40);
   FR.blt("puzzleb.raw", tft, 0, 280, 240, 40);
+  redraw = true;
 }
 
 roomID PuzzleRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
@@ -55,19 +40,20 @@ roomID PuzzleRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
     for (int y=0; y<4; ++y) {
       if (((x<3) || (y<3)) && tiles[x][y] != x+y*4)
           solved = false;
-      if (tiles[x][y] != -1) {
-        char filename[12];
-        sprintf(filename, "puzzle%d.raw", tiles[x][y]);
-        FR.blt(filename, tft, x*60, y*60 + 40, 60, 60); 
-      }
-      else {
-        tft->fillRect(x*60, y*60 + 40, 60, 60, tft->color565(87,11,81));
+      if (redraw) {
+        if (tiles[x][y] != -1) {
+          char filename[12];
+          sprintf(filename, "puzzle%d.raw", tiles[x][y]);
+          FR.blt(filename, tft, x*60, y*60 + 40, 60, 60); 
+        }
+        else {
+          tft->fillRect(x*60, y*60 + 40, 60, 60, tft->color565(87,11,81));
+        }
       }
     }
+  redraw = false;
   if (solved) {
     wheel_set(C_PUZZLE, true);
-  }
-  if (wheel_get(C_PUZZLE)) {
     char ii = 0;
     if ((now % 800) < 600)
       ii = pkey[(now / 800) % 10];
@@ -107,6 +93,7 @@ void PuzzleRoom::touchMove(int x, int y) {
     int t = tiles[sel[0]][sel[1]];
     tiles[sel[0]][sel[1]] = tiles[at[0]][at[1]];
     tiles[at[0]][at[1]] = t;
+    redraw=true;
   }
 
   sel[0] = at[0];

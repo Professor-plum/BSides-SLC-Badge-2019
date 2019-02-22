@@ -22,23 +22,24 @@ enum roomID {
   R_KEYPAD,
   R_PANEL,
   R_SPLASH,
+  R_END,
   R_NOCHANGE,
   R_CONFIGURE
 };
 
 enum check {
-  C_KEYPAD,  //Medium
-  C_PASSWORD,  //Medium
+  C_KEYPAD,  //Medium-1
+  C_PASSWORD,  //Medium-1
   C_CODE,  //Hard
-  C_PUZZLE, //Medium
-  C_CRYPTO,  //Medium
-  C_SENSOR,  //Easy **
+  C_PUZZLE, //Hard
+  C_CRYPTO,  //Medium-2
+  C_SENSOR,  //Easy 
   C_GAME,   //Easy
   C_TV,  //Easy
-  C_DJ,  //Medium
+  C_DJ,  //Medium-1
   C_SOLDER, //Hard
-  C_SOCIAL,  //Medium
-  C_PHONE, //Hard
+  C_SOCIAL,  //Medium-1
+  C_PHONE, //Medium-2
 };
 
 class Room

@@ -15,20 +15,25 @@ class ArcadeRoom: public Room {
   void touchDown(int x, int y);
   private:
   roomID n;
+  int phase;
 };
 
 void ArcadeRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
   FR.blt("arcade.raw", tft, 0, 0, 240, 320);
   n = R_NOCHANGE;
   update(tft, now);
+  if (wheel_get(C_GAME))
+    FR.blt("arcaded.raw", tft, 221, 119, 19, 55);
 }
 
 roomID ArcadeRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
-  char o[11];
-  snprintf(o, 11, "arcade%d.raw", (now/800) % 4);
-  FR.blt(o, tft, 65, 101, 138, 59);
-  if (wheel_get(C_GAME))
-    FR.blt("arcaded.raw", tft, 221, 119, 19, 55);
+  char o[12];
+  int at = (now/800) % 4;
+  if (at != phase) {
+    snprintf(o, 12, "arcade%d.raw", at+1);
+    FR.blt(o, tft, 65, 101, 138, 59);
+    phase = at;
+  }
   return n;
 }
 

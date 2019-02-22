@@ -1,4 +1,5 @@
 #include "FlashReader.h"
+#include <WavPlayer.h>
 
 void FlashReader::blt(const char* filename, Adafruit_ILI9341_STM *tft, int offx, int offy, int w, int h) {
   SerialFlashFile flashFile  = SerialFlash.open(filename);
@@ -9,6 +10,7 @@ void FlashReader::blt(const char* filename, Adafruit_ILI9341_STM *tft, int offx,
   uint16_t buf[240];
 
   for(int y=0; y<h; ++y) {
+    wavCheckBuff();
     int x = flashFile.read(buf, 2*w);
     if (x != 2*w) Serial.println("Couldn't read from file!");
     SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));

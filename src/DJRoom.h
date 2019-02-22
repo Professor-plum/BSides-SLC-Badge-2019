@@ -9,7 +9,7 @@ const int notes[] = {1, 1, 5, 5, 3, 3, 2, 4, 2, 5};
 
 class DJRoom: public Room {
   public:
-  DJRoom() : note(0), img(0), n(R_NOCHANGE) {};
+  DJRoom() : note(0), img(0), n(R_NOCHANGE), sho(false) {};
   ~DJRoom() {};
   void refresh(Adafruit_ILI9341_STM *tft, unsigned long now);
   roomID update(Adafruit_ILI9341_STM *tft, unsigned long now);
@@ -19,6 +19,7 @@ class DJRoom: public Room {
   private:
     int note, img;
     roomID n;
+    bool sho;
 };
 
 void DJRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
@@ -29,17 +30,20 @@ void DJRoom::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
 
 roomID DJRoom::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
   if (wheel_get(C_DJ)) {
-    //FR.blt("djdoor.raw", tft, 156, 128, 64, 128);
-    if ((now % 1000) > 500) {
-      if (img != 2) {
-        FR.blt("dj2.raw", tft, 0, 0, 240, 320);
-        img=2;
+    int at = (now % 1000) > 500;
+    if (at != img) {
+      img = at;
+      if (img == 0) {
+        FR.blt("dj2.raw", tft, 0, 45, 240, 275);
+      }
+      else  {
+        FR.blt("dj3.raw", tft, 0, 45, 240, 275);
       }
     }
-    else if (img != 3) {
-      FR.blt("dj3.raw", tft, 0, 0, 240, 320);
-      img = 3;
-    }
+  }
+  if (sho) {
+    FR.blt("djm.raw", tft, 59, 18, 17, 27);
+    sho=false;
   }
   return n;
 }
@@ -77,6 +81,10 @@ void DJRoom::touchDown(int x, int y) {
     note = 0;
     wheel_set(C_DJ, true);
     wavPlay("tune2.wav");
+  }
+
+  if ((x>59) && (x<74) && (y>18) && (y<45)) {
+    sho=true;
   }
   
 }

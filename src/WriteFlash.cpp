@@ -3,7 +3,7 @@
 
 //Buffer sizes
 #define USB_BUFFER_SIZE      128
-#define FLASH_BUFFER_SIZE    4096
+#define FLASH_BUFFER_SIZE    1024
 
 //Max filename length (8.3 plus a null char terminator)
 #define FILENAME_STRING_SIZE      13
@@ -27,11 +27,11 @@
 
 void newline(Adafruit_ILI9341_STM *tft) {
   int c=8;
-  uint16_t row[240*c];
-  for (int y=c; y<320; y+=c) {
-    tft->readPixels(0,y,239,y+c-1,row);
-    tft->setAddrWindow(0,y-c,240,y);
-    tft->pushColors(row, 240*c);
+  uint16_t row[240];
+  for (int y=c; y<320; ++y) {
+    tft->readPixels(0,y,239,y,row);
+    tft->setAddrWindow(0,y-c,240,y-c+1);
+    tft->pushColors(row, 240);
   }
   tft->fillRect(0,320-c,240,c,ILI9341_BLACK);
   tft->setCursor(0, 320-c);

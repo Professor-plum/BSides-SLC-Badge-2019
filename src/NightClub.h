@@ -8,7 +8,7 @@
 
 class NightClub: public Room {
 public:
-  NightClub(): night(false), idx(0) { for(int i=0; i<10; ++i) vals[i] = 1000;};
+  NightClub(): night(false) ,vals(0) {};
   ~NightClub() {};
   void refresh(Adafruit_ILI9341_STM *tft, unsigned long now);
   roomID update(Adafruit_ILI9341_STM *tft, unsigned long now);
@@ -16,8 +16,7 @@ public:
   void touchDown(int x, int y);
   private:
     bool night;
-    int vals[10];
-    int idx;
+    int vals, phase;
     roomID n;
 };
 
@@ -31,11 +30,12 @@ void NightClub::refresh(Adafruit_ILI9341_STM *tft, unsigned long now) {
 }
 
 roomID NightClub::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
-  vals[idx++ % 10] = (analogRead(LIGHT) + analogRead(LIGHT) + analogRead(LIGHT))/3;
-  bool dark = true;
-  for (int i=0; i< 10; ++i) 
-    if (vals[i] > 35) 
-      dark = false;
+  if (((analogRead(LIGHT) + analogRead(LIGHT) + analogRead(LIGHT))/3) < 15) {
+    vals++;
+  }
+  else
+    vals=0;
+  bool dark = vals > 10;
   if (night ^ dark) {
     night = dark;
     refresh(tft, now);
@@ -44,12 +44,14 @@ roomID NightClub::update(Adafruit_ILI9341_STM *tft, unsigned long now) {
   }
   if (dark) {
     uint32_t tt = now % 3000;
-    if ((tt<500) && ((tt%200) < 100)) {
+    if ((phase != 0) && (tt<500) && ((tt%200) < 100)) {
       //tft->fillRect(33,45,26,31, ILI9341_BLACK);
       FR.blt("nclubn.raw", tft, 33, 45, 26, 31);
+      phase=0;
     }
-    else {
+    else if (phase !=1) {
       FR.blt("nclubl.raw", tft, 33, 45, 26, 31);
+      phase=1;
     }
   }
   return n;
