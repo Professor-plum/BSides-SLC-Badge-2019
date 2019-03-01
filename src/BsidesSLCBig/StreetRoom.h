@@ -3,8 +3,8 @@
 
 #include "Room.h"
 #include "FlashReader.h"
-#include <LedWheel.h>
-#include <Fonts/nes.h>
+#include "LedWheel.h"
+#include "NES.h"
 
 #define PERSONW 37
 #define PERSONH 76
@@ -122,4 +122,3 @@ void StreetRoom::touchDown(int x, int y) {
 }
 
 #endif
-

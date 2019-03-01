@@ -1,4 +1,4 @@
-#include <WavPlayer.h>
+#include "WavPlayer.h"
 #ifdef USE_FLASH
 #include <SerialFlash.h>
 SerialFlashFile wavFile;

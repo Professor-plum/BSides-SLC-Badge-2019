@@ -1,5 +1,5 @@
 #include "FlashReader.h"
-#include <WavPlayer.h>
+#include "WavPlayer.h"
 
 void FlashReader::blt(const char* filename, Adafruit_ILI9341_STM *tft, int offx, int offy, int w, int h) {
   SerialFlashFile flashFile  = SerialFlash.open(filename);
@@ -22,4 +22,3 @@ void FlashReader::blt(const char* filename, Adafruit_ILI9341_STM *tft, int offx,
 }
 
 FlashReader FR;
-

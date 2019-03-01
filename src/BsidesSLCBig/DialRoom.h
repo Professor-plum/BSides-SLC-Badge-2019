@@ -85,4 +85,3 @@ void DialRoom::touchUp(int x, int y) {
   _keydown=-1;
 }
 #endif
-

@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <Adafruit_ILI9341_STM.h>
-#include <WavPlayer.h>
-#include <LedWheel.h>
+#include "WavPlayer.h"
+#include "LedWheel.h"
 
 enum roomID {
   R_TV,
@@ -57,4 +57,3 @@ public:
 };
 
 #endif
-
