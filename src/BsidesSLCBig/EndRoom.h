@@ -3,7 +3,7 @@
 
 #include "Room.h"
 #include "FlashReader.h"
-#include <Fonts/nes.h>
+#include "NES.h"
 
 #define shades 32
 
@@ -79,4 +79,3 @@ void EndRoom::touchDown(int x, int y) {
 }
 
 #endif
-

@@ -1,7 +1,7 @@
 #include <SPI.h>
-#include <Adafruit_ILI9341_STM.h>
+#include "Adafruit_ILI9341_STM_Ext_Sleep.h"
 #include <XPT2046_Touchscreen.h>
-#include <LedWheel.h>
+#include "LedWheel.h"
 #include <EEPROM.h>
 
 #include "Room.h"
@@ -39,7 +39,7 @@
 
 #define MAX_LIGHT 60000
 
-Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM(TFT_CS, TFT_DC, TFT_RST);
+Adafruit_ILI9341_STM_Ext_Sleep tft = Adafruit_ILI9341_STM_Ext_Sleep(TFT_CS, TFT_DC, TFT_RST);
 XPT2046_Touchscreen ts(T_CS, T_IRQ);
 
 uint16_t TS_MINX    = 200;
@@ -385,5 +385,3 @@ bool ask(const char* msg) {
   }
   SPI.beginTransaction(SPISettings(48000000, MSBFIRST, SPI_MODE0, DATA_SIZE_16BIT));
 }
-
-

@@ -3,7 +3,7 @@
 
 #include "Room.h"
 #include "FlashReader.h"
-#include <Fonts/nes.h>
+#include "NES.h"
 
 #define KNOB1_LOC  26,220,25,25
 #define KNOB2_LOC  190,220,25,25
@@ -228,4 +228,3 @@ bool PanelRoom::inBox(int px, int py, int x, int y, int w, int h) {
 }
 
 #endif
-

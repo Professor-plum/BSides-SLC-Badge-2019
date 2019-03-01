@@ -3,7 +3,7 @@
 
 #include "Room.h"
 #include "FlashReader.h"
-#include <Fonts/nes.h>
+#include "NES.h"
 
 #define COIN 197, 124, 5, 20
 
@@ -84,4 +84,3 @@ void MarketRoom::touchDown(int x, int y) {
 }
 
 #endif
-

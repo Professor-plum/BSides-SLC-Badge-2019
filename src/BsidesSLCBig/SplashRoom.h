@@ -3,7 +3,7 @@
 
 #include "Room.h"
 #include "FlashReader.h"
-#include <Fonts/nes.h>
+#include "NES.h"
 
 #define shades 32
 
@@ -120,4 +120,3 @@ void SplashRoom::touchUp(int x, int y) {
 }
 
 #endif
-
